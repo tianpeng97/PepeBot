@@ -3,8 +3,10 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v10");
 const fs = require("node:fs");
 const { Player } = require("discord-player");
-const { TOKEN, CLIENT_ID, GUILD_ID } = require("./config.json");
 
+const TOKEN = process.env.TOKEN;
+const CLIENT_ID = process.env.CLIENT_ID;
+const GUILD_ID = process.env.GUILD_ID;
 const LOAD_SLASH = process.argv[2] == "load";
 
 const client = new Discord.Client({
