@@ -7,7 +7,6 @@ const { Player } = require("discord-player");
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID;
-const LOAD_SLASH = process.argv[2] == "load";
 
 const client = new Discord.Client({
   intents: ["GUILDS", "GUILD_VOICE_STATES"],
@@ -30,7 +29,7 @@ const slashFiles = fs
 for (const file of slashFiles) {
   const slashCmd = require(`./slashCommands/${file}`);
   client.slashcommands.set(slashCmd.data.name, slashCmd);
-  if (LOAD_SLASH) commands.push(slashCmd.data.toJSON());
+  commands.push(slashCmd.data.toJSON());
 }
 
 const rest = new REST({ version: "9" }).setToken(TOKEN);
