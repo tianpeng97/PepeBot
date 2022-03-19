@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const { Client, Collection } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v10");
 const fs = require("node:fs");
@@ -6,13 +6,12 @@ const { Player } = require("discord-player");
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-const GUILD_ID = process.env.GUILD_ID;
 
-const client = new Discord.Client({
+const client = new Client({
   intents: ["GUILDS", "GUILD_VOICE_STATES"],
 });
 
-client.slashcommands = new Discord.Collection();
+client.slashcommands = new Collection();
 client.player = new Player(client, {
   ytdlOptions: {
     quality: "highestaudio",
@@ -33,27 +32,28 @@ for (const file of slashFiles) {
 }
 
 const rest = new REST({ version: "9" }).setToken(TOKEN);
-// change routes to applicationCommands(CLIENT_ID) to make commands global
-(async () => {
-  await rest
-    .put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
-      body: commands,
-    })
-    .then(() => {
-      console.log("Loaded commands!");
-      process.exit(0);
-    })
-    .catch((error) => {
-      if (error) {
-        console.log(error);
-        process.exit(1);
-      }
-    });
-})();
 
-client.on("ready", () => {
+client.once("ready", () => {
+  // change routes to applicationCommands(CLIENT_ID) to make commands global
+  (async () => {
+    await rest
+      .put(Routes.applicationCommands(CLIENT_ID), {
+        body: commands,
+      })
+      .then(() => {
+        console.log("Loaded commands!");
+      })
+      .catch((error) => {
+        if (error) {
+          console.log(error);
+          process.exit(1);
+        }
+      });
+  })();
+
   console.log(`Logged in as ${client.user.tag}`);
 });
+
 client.on("interactionCreate", (interaction) => {
   async function handleCmd() {
     if (!interaction.isCommand()) return;
@@ -64,6 +64,8 @@ client.on("interactionCreate", (interaction) => {
     await interaction.deferReply();
     await slashCmd.run({ client, interaction });
   }
+
   handleCmd();
 });
+
 client.login(TOKEN);
