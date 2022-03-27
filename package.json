@@ -8,8 +8,8 @@
         "release": "standard-version"
     },
     "engines": {
-        "node": "17.x",
-        "npm": "8.x"
+        "node": "^17",
+        "npm": "^8"
     },
     "repository": {
         "type": "git",
