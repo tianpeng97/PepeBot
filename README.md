@@ -10,4 +10,4 @@ An implementation of the Discord Voice API for Node.js, written in Javascript.
 
 ## Future implementations
 
--
+- Songs and playlists from Spotify, Soundcloud

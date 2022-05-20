@@ -1,29 +1,30 @@
-const { Client, Collection } = require("discord.js");
-const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v10");
-const fs = require("node:fs");
-const { Player } = require("discord-player");
+const { Client, Collection, Attachment } = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v10');
+const fs = require('node:fs');
+const { Player } = require('discord-player');
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
 const client = new Client({
-  intents: ["GUILDS", "GUILD_VOICE_STATES"],
+  intents: ['GUILDS', 'GUILD_VOICE_STATES'],
 });
 
 client.slashcommands = new Collection();
 client.player = new Player(client, {
   ytdlOptions: {
-    quality: "highestaudio",
+    quality: 'highestaudio',
     highWaterMark: 1 << 25,
   },
 });
 
 let commands = [];
+const PREFIX = '!';
 
 const slashFiles = fs
-  .readdirSync("./slashCommands")
-  .filter((file) => file.endsWith(".js"));
+  .readdirSync('./slashCommands')
+  .filter((file) => file.endsWith('.js'));
 
 for (const file of slashFiles) {
   const slashCmd = require(`./slashCommands/${file}`);
@@ -31,9 +32,9 @@ for (const file of slashFiles) {
   commands.push(slashCmd.data.toJSON());
 }
 
-const rest = new REST({ version: "9" }).setToken(TOKEN);
+const rest = new REST({ version: '9' }).setToken(TOKEN);
 
-client.once("ready", () => {
+client.once('ready', () => {
   // change routes to applicationCommands(CLIENT_ID) to make commands global
   (async () => {
     await rest
@@ -41,7 +42,7 @@ client.once("ready", () => {
         body: commands,
       })
       .then(() => {
-        console.log("Loaded commands!");
+        console.log('Loaded commands!');
       })
       .catch((error) => {
         if (error) {
@@ -54,18 +55,29 @@ client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on("interactionCreate", (interaction) => {
+client.on('interactionCreate', (interaction) => {
   async function handleCmd() {
     if (!interaction.isCommand()) return;
 
     const slashCmd = client.slashcommands.get(interaction.commandName);
-    if (!slashCmd) interaction.reply("Not a valid command.");
+    if (!slashCmd) interaction.reply('Not a valid command.');
 
     await interaction.deferReply();
     await slashCmd.run({ client, interaction });
   }
 
   handleCmd();
+});
+
+client.on('message', (message) => {
+  let args = message.content.substring(PREFIX.length).split(' ');
+
+  switch (args[0]) {
+    case 'dragos':
+      const attachment = new Attachment('./img/dragos.png');
+      message.channel.send(message.author, attachment);
+      break;
+  }
 });
 
 client.login(TOKEN);
